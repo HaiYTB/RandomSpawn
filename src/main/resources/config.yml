@@ -1,0 +1,47 @@
+# RandomSpawn Configuration
+
+# Spawn location range
+spawn:
+  # X coordinate range
+  x:
+    min: -1000
+    max: 1000
+  
+  # Y coordinate range (ignored if force-ground-spawn is true)
+  y:
+    min: 64
+    max: 128
+  
+  # Z coordinate range
+  z:
+    min: -1000
+    max: 1000
+  
+  # If true, players will always spawn on the surface
+  # This will disable the Y coordinate range setting above
+  force-ground-spawn: true
+  
+  # Maximum number of attempts to find a safe spawn location
+  max-tries: 50
+
+# Event settings
+events:
+  # Enable random spawn on first join
+  first-join: true
+  
+  # Enable random spawn on death
+  respawn-on-death: true
+
+# List of worlds where random spawn is enabled
+# If empty, only the default world will be used
+enabled-worlds:
+  - world
+  # - world_nether
+  # - world_the_end
+
+# Messages
+messages:
+  prefix: "&6[RandomSpawn] &r"
+  reload: "&aConfiguration reloaded successfully!"
+  no-permission: "&cYou don't have permission to use this command!"
+

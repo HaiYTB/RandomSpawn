@@ -1,0 +1,19 @@
+name: RandomSpawn
+version: 1.0.0
+main: wolfcraft.randomspawn.RandomSpawn
+api-version: 1.21
+description: A plugin to randomly spawn players on join and respawn
+commands:
+  rd:
+    description: RandomSpawn main command
+    usage: /rd [reload]
+    aliases: [randomspawn]
+  random:
+    description: RandomSpawn main command
+    usage: /random [reload]
+    aliases: [randomspawn]
+permissions:
+  randomspawn.reload:
+    description: Permission to reload the plugin
+    default: op
+
