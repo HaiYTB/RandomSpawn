@@ -79,6 +79,12 @@ enabled-worlds:
   - world
   # - world_nether
   # - world_the_end
+
+# Messages
+messages:
+  prefix: "&6[RandomSpawn] &r"
+  reload: "&aConfiguration reloaded successfully!"
+  no-permission: "&cYou don't have permission to use this command!"
 ```
 
 ## Building from Source
