@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/HaiYTB/RandomSpawn/main/logo.png" width="256" alt="RandomSpawn Logo"/>
+</p>
+
 # RandomSpawn
 
 RandomSpawn is a lightweight and high-performance SpigotMC plugin that provides random spawn locations for players on first join and respawn after death.
