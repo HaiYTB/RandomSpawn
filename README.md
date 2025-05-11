@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/HaiYTB/RandomSpawn/main/logo.png" width="256" alt="RandomSpawn Logo"/>
+  <img src="https://raw.githubusercontent.com/HaiYTB/RandomSpawn/refs/heads/main/icon.png" width="256" alt="RandomSpawn Logo"/>
 </p>
 
 # RandomSpawn
