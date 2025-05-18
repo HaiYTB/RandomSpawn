@@ -69,6 +69,18 @@ spawn:
   # Maximum number of attempts to find a safe spawn location
   max-tries: 50
 
+# List of dangerous blocks that players should not spawn on
+fatal-blocks:
+  - BEDROCK
+  - LAVA
+  - FIRE
+  - CACTUS
+  - MAGMA_BLOCK
+  - CAMPFIRE
+  - SOUL_CAMPFIRE
+  - WITHER_ROSE
+  - SWEET_BERRY_BUSH
+
 # Event settings
 events:
   # Enable random spawn on first join
