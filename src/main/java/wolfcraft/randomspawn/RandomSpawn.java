@@ -15,7 +15,6 @@ import com.google.common.io.ByteStreams;
 public class RandomSpawn extends JavaPlugin {
     private FileConfiguration config;
     private SpawnManager spawnManager;
-    private final String PREFIX = ChatColor.GOLD + "[RandomSpawn] " + ChatColor.RESET;
 
     @Override
     public void onEnable() {
@@ -43,7 +42,7 @@ public class RandomSpawn extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         // Handle both command aliases: /rd and /random
-        if (cmd.getName().equalsIgnoreCase("rd") || cmd.getName().equalsIgnoreCase("random")) {
+        if (cmd.getName().equalsIgnoreCase("rd") ) {
             if (args.length == 0) {
                 // Show help
                 showHelp(sender);
@@ -53,7 +52,7 @@ public class RandomSpawn extends JavaPlugin {
             if (args[0].equalsIgnoreCase("reload")) {
                 // Check permission
                 if (!sender.hasPermission("randomspawn.reload")) {
-                    sender.sendMessage(PREFIX + ChatColor.RED + "You don't have permission to use this command!");
+                    sender.sendMessage(getMessage("no-permission"));
                     return true;
                 }
 
@@ -61,7 +60,7 @@ public class RandomSpawn extends JavaPlugin {
                 reloadConfig();
                 config = getConfig();
                 spawnManager.reloadConfig();
-                sender.sendMessage(PREFIX + ChatColor.GREEN + "Configuration reloaded successfully!");
+                sender.sendMessage(getMessage("reload"));
                 return true;
             }
 
@@ -71,6 +70,14 @@ public class RandomSpawn extends JavaPlugin {
         }
 
         return false;
+    }
+
+    public String getMessage(String key) {
+        String prefix = ChatColor.translateAlternateColorCodes('&', 
+            config.getString("messages.prefix", "&6[RandomSpawn] &r"));
+        String msg = ChatColor.translateAlternateColorCodes('&', 
+            config.getString("messages." + key, ""));
+        return prefix + msg;
     }
 
     private void showHelp(CommandSender sender) {
