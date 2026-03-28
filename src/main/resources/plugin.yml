@@ -12,4 +12,3 @@ permissions:
   randomspawn.reload:
     description: Permission to reload the plugin
     default: op
-

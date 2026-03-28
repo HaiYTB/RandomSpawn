@@ -138,8 +138,7 @@ public class SpawnManager {
         int z = randomBetween(zMin, zMax);
 
         if (forceGroundSpawn) {
-            int surfaceY = world.getHighestBlockYAt(x, z);
-            return new Location(world, x, surfaceY, z);
+            return new Location(world, x, world.getMaxHeight() - 1, z);
         } else {
             int y = randomBetween(yMin, yMax);
             return new Location(world, x, y, z);
@@ -151,7 +150,7 @@ public class SpawnManager {
         int x = location.getBlockX();
         int z = location.getBlockZ();
 
-        int surfaceY = location.getBlockY();
+        int surfaceY = world.getHighestBlockYAt(x, z);
 
         if (surfaceY < yMin || surfaceY > yMax) {
             return null;
