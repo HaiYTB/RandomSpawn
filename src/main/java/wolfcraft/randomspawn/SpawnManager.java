@@ -93,19 +93,22 @@ public class SpawnManager {
         for (int attempt = 0; attempt < maxTries; attempt++) {
             Location location = generateRandomLocation(world);
 
-            if (isSafeLocation(location)) {
-                if (forceGroundSpawn) {
-                    location = findSafeYPosition(location);
-                }
+            if (forceGroundSpawn) {
+                location = findSafeYPosition(location);
 
                 if (location != null) {
                     location = centerOnBlock(location);
                     location.setYaw(random.nextFloat() * 360);
                     location.setPitch(0);
-
                     cacheLocation(world.getName(), location);
                     return location;
                 }
+            } else if (isSafeLocation(location)) {
+                location = centerOnBlock(location);
+                location.setYaw(random.nextFloat() * 360);
+                location.setPitch(0);
+                cacheLocation(world.getName(), location);
+                return location;
             }
         }
 
@@ -158,19 +161,19 @@ public class SpawnManager {
             return false;
         }
 
+        if (forceGroundSpawn) {
+            return true;
+        }
+
         Block block = location.getBlock();
         Block blockBelow = location.clone().add(0, -1, 0).getBlock();
         Block blockAbove = location.clone().add(0, 1, 0).getBlock();
 
-        if (!forceGroundSpawn) {
-            return block.getType().isAir() &&
-                   blockAbove.getType().isAir() &&
-                   !blockBelow.getType().isAir() &&
-                   !blockBelow.isLiquid() &&
-                   !isFatalBlock(blockBelow.getType().toString());
-        }
-
-        return true;
+        return block.getType().isAir() &&
+           blockAbove.getType().isAir() &&
+           !blockBelow.getType().isAir() &&
+           !blockBelow.isLiquid() &&
+           !isFatalBlock(blockBelow.getType().toString());
     }
 
     private boolean isFatalBlock(String blockType) {
