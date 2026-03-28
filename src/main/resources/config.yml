@@ -20,6 +20,9 @@ spawn:
   # If true, players will always spawn on the surface
   # This will disable the Y coordinate range setting above
   force-ground-spawn: true
+
+  # If set, players will be transferred to the specified server after spawning (supports BungeeCord/Waterfall/Velocity)
+  transfer-to-server: ''
   
   # Maximum number of attempts to find a safe spawn location
   max-tries: 50
@@ -56,4 +59,3 @@ messages:
   prefix: "&6[RandomSpawn] &r"
   reload: "&aConfiguration reloaded successfully!"
   no-permission: "&cYou don't have permission to use this command!"
-

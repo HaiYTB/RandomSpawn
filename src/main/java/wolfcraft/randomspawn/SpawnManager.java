@@ -29,6 +29,7 @@ public class SpawnManager {
     private boolean enableFirstJoinSpawn;
     private boolean enableRespawnOnDeath;
     private int maxTries;
+    private String transferServerName;
     private Set<String> enabledWorlds;
     private Set<String> fatalBlocks;
 
@@ -51,6 +52,7 @@ public class SpawnManager {
         forceGroundSpawn = config.getBoolean("spawn.force-ground-spawn", true);
         enableFirstJoinSpawn = config.getBoolean("events.first-join", true);
         enableRespawnOnDeath = config.getBoolean("events.respawn-on-death", true);
+        transferServerName = config.getString("spawn.transfer-to-server", "");
         maxTries = config.getInt("spawn.max-tries", 50);
         fatalBlocks = new HashSet<>();
         for (String block : config.getStringList("fatal-blocks")) {
@@ -75,6 +77,10 @@ public class SpawnManager {
 
     public boolean isWorldEnabled(String worldName) {
         return enabledWorlds.contains(worldName);
+    }
+
+    public String getTransferServerName() {
+        return transferServerName;
     }
 
     public Location getRandomSpawnLocation(Player player) {
@@ -134,8 +140,8 @@ public class SpawnManager {
             Block blockAbove = world.getBlockAt(x, y + 1, z);
             Block blockTwoAbove = world.getBlockAt(x, y + 2, z);
 
-            if (!block.getType().isAir() && 
-                blockAbove.getType().isAir() && 
+            if (!block.getType().isAir() &&
+                blockAbove.getType().isAir() &&
                 blockTwoAbove.getType().isAir() &&
                 !block.isLiquid() &&
                 !isFatalBlock(block.getType().toString())) {
@@ -157,7 +163,7 @@ public class SpawnManager {
         Block blockAbove = location.clone().add(0, 1, 0).getBlock();
 
         if (!forceGroundSpawn) {
-            return block.getType().isAir() && 
+            return block.getType().isAir() &&
                    blockAbove.getType().isAir() &&
                    !blockBelow.getType().isAir() &&
                    !blockBelow.isLiquid() &&
@@ -188,7 +194,7 @@ public class SpawnManager {
             locations.remove(locArray[random.nextInt(locArray.length)]);
         }
     }
-    
+
     private int randomBetween(int min, int max) {
         if (min > max) {
             int temp = min;
