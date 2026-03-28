@@ -150,19 +150,23 @@ public class SpawnManager {
         int x = location.getBlockX();
         int z = location.getBlockZ();
 
-        for (int y = world.getMaxHeight() - 1; y > 0; y--) {
-            Block block = world.getBlockAt(x, y, z);
-            Block blockAbove = world.getBlockAt(x, y + 1, z);
-            Block blockTwoAbove = world.getBlockAt(x, y + 2, z);
+        int surfaceY = world.getHighestBlockYAt(x, z);
 
-            if (!block.getType().isAir() &&
-                blockAbove.getType().isAir() &&
-                blockTwoAbove.getType().isAir() &&
-                !block.isLiquid() &&
-                !isFatalBlock(block.getType().toString())) {
+        if (surfaceY < yMin || surfaceY > yMax) {
+            return null;
+        }
 
-                return new Location(world, x, y + 1, z);
-            }
+        Block groundBlock = world.getBlockAt(x, surfaceY, z);
+        Block feetBlock = world.getBlockAt(x, surfaceY + 1, z);
+        Block headBlock = world.getBlockAt(x, surfaceY + 2, z);
+
+        if (!groundBlock.getType().isAir() &&
+            !groundBlock.isLiquid() &&
+            !isFatalBlock(groundBlock.getType().toString()) &&
+            feetBlock.getType().isAir() &&
+            headBlock.getType().isAir()) {
+
+            return new Location(world, x, surfaceY + 1, z);
         }
 
         return null;
