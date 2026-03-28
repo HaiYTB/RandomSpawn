@@ -6,6 +6,8 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.HashSet;
@@ -114,8 +116,18 @@ public class SpawnManager {
 
         Set<Location> cachedLocations = safeLocationsCache.get(world.getName());
         if (cachedLocations != null && !cachedLocations.isEmpty()) {
-            Location[] locations = cachedLocations.toArray(new Location[0]);
-            return locations[random.nextInt(locations.length)];
+            List<Location> validCached = new ArrayList<>();
+            for (Location loc : cachedLocations) {
+                if (isStillSafe(loc)) {
+                    validCached.add(loc);
+                }
+            }
+
+            cachedLocations.removeIf(loc -> !validCached.contains(loc));
+
+            if (!validCached.isEmpty()) {
+                return validCached.get(random.nextInt(validCached.size()));
+            }
         }
 
         return null;
@@ -176,6 +188,25 @@ public class SpawnManager {
            !isFatalBlock(blockBelow.getType().toString());
     }
 
+    private boolean isStillSafe(Location location) {
+        if (location == null || location.getWorld() == null) return false;
+
+        World world = location.getWorld();
+        int x = location.getBlockX();
+        int y = location.getBlockY();
+        int z = location.getBlockZ();
+
+        Block feet = world.getBlockAt(x, y, z);
+        Block head = world.getBlockAt(x, y + 1, z);
+        Block ground = world.getBlockAt(x, y - 1, z);
+
+        return feet.getType().isAir() &&
+            head.getType().isAir() &&
+            !ground.getType().isAir() &&
+            !ground.isLiquid() &&
+            !isFatalBlock(ground.getType().toString());
+    }
+
     private boolean isFatalBlock(String blockType) {
         return fatalBlocks.contains(blockType.toUpperCase());
     }
@@ -187,9 +218,10 @@ public class SpawnManager {
     }
 
     private void cacheLocation(String worldName, Location location) {
-        safeLocationsCache.computeIfAbsent(worldName, k -> new HashSet<>());
+        Set<Location> locations = safeLocationsCache.computeIfAbsent(
+            worldName, k -> ConcurrentHashMap.newKeySet()
+        );
 
-        Set<Location> locations = safeLocationsCache.get(worldName);
         locations.add(location.clone());
 
         if (locations.size() > 50) {
