@@ -3,6 +3,7 @@ version: 1.0.2
 main: wolfcraft.randomspawn.RandomSpawn
 api-version: 1.21
 description: A plugin to randomly spawn players on join and respawn
+folia-supported: true
 commands:
   rd:
     description: RandomSpawn main command
