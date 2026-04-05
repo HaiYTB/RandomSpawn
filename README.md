@@ -23,8 +23,8 @@ RandomSpawn is a lightweight and high-performance SpigotMC plugin that provides 
 
 | Command | Description | Permission |
 |---------|-------------|------------|
-| `/rd` or `/random` | Shows the help menu | None |
-| `/rd reload` or `/random reload` | Reloads the plugin configuration | `randomspawn.reload` |
+| `/rd` | Shows the help menu | None |
+| `/rd reload` | Reloads the plugin configuration | `randomspawn.reload` |
 
 ## Permissions
 
@@ -65,6 +65,9 @@ spawn:
   # If true, players will always spawn on the surface
   # This will disable the Y coordinate range setting above
   force-ground-spawn: true
+
+  # If set, players will be transferred to the specified server after spawning (supports BungeeCord/Waterfall/Velocity)
+  transfer-to-server: ''
   
   # Maximum number of attempts to find a safe spawn location
   max-tries: 50
