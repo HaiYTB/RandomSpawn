@@ -1,5 +1,6 @@
 package wolfcraft.randomspawn;
 
+import org.bukkit.Material;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -162,7 +163,7 @@ public class SpawnManager {
         Block headBlock = world.getBlockAt(x, surfaceY + 2, z);
 
         if (!groundBlock.getType().isAir() &&
-            !groundBlock.isLiquid() &&
+            !isLiquid(groundBlock) &&
             !isFatalBlock(groundBlock.getType().toString()) &&
             feetBlock.getType().isAir() &&
             headBlock.getType().isAir()) {
@@ -189,7 +190,7 @@ public class SpawnManager {
         return block.getType().isAir() &&
            blockAbove.getType().isAir() &&
            !blockBelow.getType().isAir() &&
-           !blockBelow.isLiquid() &&
+           !isLiquid(blockBelow) &&
            !isFatalBlock(blockBelow.getType().toString());
     }
 
@@ -208,8 +209,13 @@ public class SpawnManager {
         return feet.getType().isAir() &&
             head.getType().isAir() &&
             !ground.getType().isAir() &&
-            !ground.isLiquid() &&
+            !isLiquid(ground) &&
             !isFatalBlock(ground.getType().toString());
+    }
+
+    private boolean isLiquid(Block block) {
+        Material type = block.getType();
+        return type == Material.WATER || type == Material.LAVA;
     }
 
     private boolean isFatalBlock(String blockType) {
