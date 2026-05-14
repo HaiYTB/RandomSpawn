@@ -24,7 +24,7 @@ public class PlayerListener implements Listener {
         if (!player.hasPlayedBefore() && spawnManager.isFirstJoinEnabled()) {
             FoliaUtils.runDelayed(plugin, player, () -> {
                 if (player.isOnline()) teleportToRandomSpawn(player);
-            }, 5L);
+            }, spawnManager.getJoinDelayTicks());
         }
     }
 
@@ -46,7 +46,7 @@ public class PlayerListener implements Listener {
                         FoliaUtils.runDelayed(plugin, player, () -> {
                             if (player.isOnline())
                                 plugin.transferPlayerToServer(player, transferServer);
-                        }, 5L);
+                        }, spawnManager.getTransferDelayTicks());
                     }
                 }
             }

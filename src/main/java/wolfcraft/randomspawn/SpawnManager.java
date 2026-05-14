@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +17,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public class SpawnManager {
     private final RandomSpawn plugin;
     private FileConfiguration config;
-    private final Random random;
 
     private final ConcurrentHashMap<String, Set<Location>> safeLocationsCache;
 
@@ -32,13 +30,15 @@ public class SpawnManager {
     private boolean enableFirstJoinSpawn;
     private boolean enableRespawnOnDeath;
     private int maxTries;
+    private int cacheLimit;
+    private long joinDelayTicks;
+    private long transferDelayTicks;
     private String transferServerName;
     private Set<String> enabledWorlds;
     private Set<String> fatalBlocks;
 
     public SpawnManager(RandomSpawn plugin) {
         this.plugin = plugin;
-        this.random = new Random();
         this.safeLocationsCache = new ConcurrentHashMap<>();
         reloadConfig();
     }
@@ -57,6 +57,9 @@ public class SpawnManager {
         enableRespawnOnDeath = config.getBoolean("events.respawn-on-death", true);
         transferServerName = config.getString("spawn.transfer-to-server", "");
         maxTries = config.getInt("spawn.max-tries", 50);
+        cacheLimit = Math.max(1, config.getInt("spawn.cache-size", 128));
+        joinDelayTicks = Math.max(0L, config.getLong("spawn.join-delay-ticks", 5L));
+        transferDelayTicks = Math.max(0L, config.getLong("spawn.transfer-delay-ticks", 5L));
         fatalBlocks = new HashSet<>();
         for (String block : config.getStringList("fatal-blocks")) {
             fatalBlocks.add(block.toUpperCase());
@@ -86,6 +89,39 @@ public class SpawnManager {
         return transferServerName;
     }
 
+    public Set<String> getEnabledWorlds() {
+        return new HashSet<>(enabledWorlds);
+    }
+
+    public long getJoinDelayTicks() {
+        return joinDelayTicks;
+    }
+
+    public long getTransferDelayTicks() {
+        return transferDelayTicks;
+    }
+
+    public int getCacheLimit() {
+        return cacheLimit;
+    }
+
+    public int getCacheSize(String worldName) {
+        Set<Location> locations = safeLocationsCache.get(worldName);
+        return locations == null ? 0 : locations.size();
+    }
+
+    public int getTotalCacheSize() {
+        int total = 0;
+        for (Set<Location> locations : safeLocationsCache.values()) {
+            total += locations.size();
+        }
+        return total;
+    }
+
+    public void clearCache() {
+        safeLocationsCache.clear();
+    }
+
     public Location getRandomSpawnLocation(Player player) {
         World world = player.getWorld();
 
@@ -101,14 +137,14 @@ public class SpawnManager {
 
                 if (location != null) {
                     location = centerOnBlock(location);
-                    location.setYaw(random.nextFloat() * 360);
+                    location.setYaw(ThreadLocalRandom.current().nextFloat() * 360.0f);
                     location.setPitch(0);
                     cacheLocation(world.getName(), location);
                     return location;
                 }
             } else if (isSafeLocation(location)) {
                 location = centerOnBlock(location);
-                location.setYaw(random.nextFloat() * 360);
+                location.setYaw(ThreadLocalRandom.current().nextFloat() * 360.0f);
                 location.setPitch(0);
                 cacheLocation(world.getName(), location);
                 return location;
@@ -124,10 +160,11 @@ public class SpawnManager {
                 }
             }
 
-            cachedLocations.removeIf(loc -> !validCached.contains(loc));
+            Set<Location> validCachedSet = new HashSet<>(validCached);
+            cachedLocations.removeIf(loc -> !validCachedSet.contains(loc));
 
             if (!validCached.isEmpty()) {
-                return validCached.get(random.nextInt(validCached.size()));
+                return validCached.get(ThreadLocalRandom.current().nextInt(validCached.size())).clone();
             }
         }
 
@@ -235,9 +272,12 @@ public class SpawnManager {
 
         locations.add(location.clone());
 
-        if (locations.size() > 50) {
+        while (locations.size() > cacheLimit) {
             Location[] locArray = locations.toArray(new Location[0]);
-            locations.remove(locArray[random.nextInt(locArray.length)]);
+            if (locArray.length == 0) {
+                break;
+            }
+            locations.remove(locArray[ThreadLocalRandom.current().nextInt(locArray.length)]);
         }
     }
 

@@ -7,8 +7,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.ChatColor;
 
-import java.util.Arrays;
-import java.util.List;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
@@ -41,35 +39,45 @@ public class RandomSpawn extends JavaPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        // Handle both command aliases: /rd and /random
-        if (cmd.getName().equalsIgnoreCase("rd") ) {
-            if (args.length == 0) {
-                // Show help
-                showHelp(sender);
-                return true;
-            }
+        if (!isManagedCommand(cmd.getName())) {
+            return false;
+        }
 
-            if (args[0].equalsIgnoreCase("reload")) {
-                // Check permission
-                if (!sender.hasPermission("randomspawn.reload")) {
-                    sender.sendMessage(getMessage("no-permission"));
-                    return true;
-                }
-
-                // Reload config
-                reloadConfig();
-                config = getConfig();
-                spawnManager.reloadConfig();
-                sender.sendMessage(getMessage("reload"));
-                return true;
-            }
-
-            // Unknown argument, show help
+        if (args.length == 0) {
             showHelp(sender);
             return true;
         }
 
-        return false;
+        String subCommand = args[0].toLowerCase();
+        if ("reload".equals(subCommand)) {
+            if (!sender.hasPermission("randomspawn.reload")) {
+                sender.sendMessage(getMessage("no-permission"));
+                return true;
+            }
+
+            reloadPluginConfig();
+            sender.sendMessage(getMessage("reload"));
+            return true;
+        }
+
+        if ("status".equals(subCommand)) {
+            sendStatus(sender);
+            return true;
+        }
+
+        if ("cache".equals(subCommand) && args.length > 1 && "clear".equalsIgnoreCase(args[1])) {
+            if (!sender.hasPermission("randomspawn.manage")) {
+                sender.sendMessage(getMessage("no-permission"));
+                return true;
+            }
+
+            spawnManager.clearCache();
+            sender.sendMessage(getMessage("cache-cleared"));
+            return true;
+        }
+
+        showHelp(sender);
+        return true;
     }
 
     public String getMessage(String key) {
@@ -82,14 +90,36 @@ public class RandomSpawn extends JavaPlugin {
 
     private void showHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.YELLOW + "=== RandomSpawn Help ===");
-        sender.sendMessage(ChatColor.GOLD + "/rd reload " + ChatColor.WHITE + "- Reload the configuration");
-        sender.sendMessage(ChatColor.GOLD + "/random reload " + ChatColor.WHITE + "- Reload the configuration");
+        sender.sendMessage(ChatColor.GOLD + "/rd reload" + ChatColor.WHITE + " - Reload the configuration");
+        sender.sendMessage(ChatColor.GOLD + "/rd status" + ChatColor.WHITE + " - Show current spawn settings");
+        sender.sendMessage(ChatColor.GOLD + "/rd cache clear" + ChatColor.WHITE + " - Clear the safe spawn cache");
     }
 
     public void reloadPluginConfig() {
         reloadConfig();
         config = getConfig();
         spawnManager.reloadConfig();
+    }
+
+    private void sendStatus(CommandSender sender) {
+        sender.sendMessage(ChatColor.YELLOW + "=== RandomSpawn Status ===");
+        sender.sendMessage(ChatColor.GRAY + "Folia: " + ChatColor.WHITE + (FoliaUtils.isFolia() ? "enabled" : "disabled"));
+        sender.sendMessage(ChatColor.GRAY + "First join spawn: " + ChatColor.WHITE + spawnManager.isFirstJoinEnabled());
+        sender.sendMessage(ChatColor.GRAY + "Respawn spawn: " + ChatColor.WHITE + spawnManager.isRespawnOnDeathEnabled());
+        sender.sendMessage(ChatColor.GRAY + "Join delay: " + ChatColor.WHITE + spawnManager.getJoinDelayTicks() + " ticks");
+        sender.sendMessage(ChatColor.GRAY + "Transfer delay: " + ChatColor.WHITE + spawnManager.getTransferDelayTicks() + " ticks");
+        sender.sendMessage(ChatColor.GRAY + "Cache limit: " + ChatColor.WHITE + spawnManager.getCacheLimit());
+        sender.sendMessage(ChatColor.GRAY + "Cached locations: " + ChatColor.WHITE + spawnManager.getTotalCacheSize());
+        sender.sendMessage(ChatColor.GRAY + "Enabled worlds: " + ChatColor.WHITE + String.join(", ", spawnManager.getEnabledWorlds()));
+        String transferServer = spawnManager.getTransferServerName();
+        sender.sendMessage(ChatColor.GRAY + "Transfer server: " + ChatColor.WHITE +
+            (transferServer == null || transferServer.isEmpty() ? "none" : transferServer));
+    }
+
+    private boolean isManagedCommand(String commandName) {
+        return "rd".equalsIgnoreCase(commandName)
+            || "random".equalsIgnoreCase(commandName)
+            || "randomspawn".equalsIgnoreCase(commandName);
     }
 
     public void transferPlayerToServer(Player player, String serverName) {
