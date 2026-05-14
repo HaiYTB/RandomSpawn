@@ -7,7 +7,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlayerListener implements Listener {
     private final RandomSpawn plugin;
@@ -22,17 +21,10 @@ public class PlayerListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        // Only teleport on first join
         if (!player.hasPlayedBefore() && spawnManager.isFirstJoinEnabled()) {
-            // Delay the teleport to ensure the player is fully loaded
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    if (player.isOnline()) {
-                        teleportToRandomSpawn(player);
-                    }
-                }
-            }.runTaskLater(plugin, 5L); // 5 ticks = 0.25 seconds
+            FoliaUtils.runDelayed(plugin, player, () -> {
+                if (player.isOnline()) teleportToRandomSpawn(player);
+            }, spawnManager.getJoinDelayTicks());
         }
     }
 
@@ -49,17 +41,12 @@ public class PlayerListener implements Listener {
                 if (randomLocation != null) {
                     event.setRespawnLocation(randomLocation);
 
-                    // If configured, transfer the player to another server after respawn
-                    if (spawnManager.getTransferServerName() != null && !spawnManager.getTransferServerName().isEmpty()) {
-                        // Delay the transfer to ensure the player is fully respawned
-                        new BukkitRunnable() {
-                            @Override
-                            public void run() {
-                                if (player.isOnline()) {
-                                    plugin.transferPlayerToServer(player, spawnManager.getTransferServerName());
-                                }
-                            }
-                        }.runTaskLater(plugin, 5L); // 5 ticks = 0.25 seconds
+                    String transferServer = spawnManager.getTransferServerName();
+                    if (transferServer != null && !transferServer.isEmpty()) {
+                        FoliaUtils.runDelayed(plugin, player, () -> {
+                            if (player.isOnline())
+                                plugin.transferPlayerToServer(player, transferServer);
+                        }, spawnManager.getTransferDelayTicks());
                     }
                 }
             }
@@ -70,7 +57,7 @@ public class PlayerListener implements Listener {
         Location randomLocation = spawnManager.getRandomSpawnLocation(player);
 
         if (randomLocation != null) {
-            player.teleport(randomLocation);
+            FoliaUtils.teleport(plugin, player, randomLocation);
         }
     }
 }

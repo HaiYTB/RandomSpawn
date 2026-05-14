@@ -27,6 +27,15 @@ spawn:
   # Maximum number of attempts to find a safe spawn location
   max-tries: 50
 
+  # Maximum number of safe locations cached per world
+  cache-size: 128
+
+  # Delay before the first-join teleport runs
+  join-delay-ticks: 5
+
+  # Delay before the optional post-respawn transfer runs
+  transfer-delay-ticks: 5
+
 # List of dangerous blocks that players should not spawn on
 fatal-blocks:
   - BEDROCK
@@ -58,4 +67,5 @@ enabled-worlds:
 messages:
   prefix: "&6[RandomSpawn] &r"
   reload: "&aConfiguration reloaded successfully!"
+  cache-cleared: "&aSafe spawn cache cleared!"
   no-permission: "&cYou don't have permission to use this command!"
